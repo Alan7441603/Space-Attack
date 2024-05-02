@@ -9,6 +9,8 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
+    var livesLabel = SKLabelNode()
+    var scoreLabel = SKLabelNode()
     
     override func didMove(to view: SKView) {
         //happens once (when the game opens
@@ -30,6 +32,17 @@ class GameScene: SKScene {
         }
     }
     
-    
+    func makeLabels() {
+        livesLabel.fontSize = 18
+        livesLabel.fontColor = .black
+        livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
+        addChild(livesLabel)
+        
+        scoreLabel.fontSize = 18
+        scoreLabel.fontColor = .black
+        scoreLabel.fontName = "Arial"
+        scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
+        addChild(scoreLabel)
+    }
     
 }

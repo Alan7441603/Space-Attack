@@ -11,10 +11,23 @@ import GameplayKit
 class GameScene: SKScene {
     var livesLabel = SKLabelNode()
     var scoreLabel = SKLabelNode()
+    var spaceship = SKSpriteNode(imageNamed: "Spaceship")
+    var playingGame = false
+    var playLabel = SKLabelNode()
+    var score = 0
+    var lives = 3
     
     override func didMove(to view: SKView) {
         //happens once (when the game opens
         createBackground()
+        resetGame()
+        makeLabels()
+    }
+    
+    func resetGame() {
+        //this stuff happens before each game starts
+        createSpaceship()
+        updateLabels()
     }
     
     func createBackground() {
@@ -33,6 +46,13 @@ class GameScene: SKScene {
     }
     
     func makeLabels() {
+        playLabel.fontSize = 24
+        playLabel.text = "Tap to start"
+        playLabel.fontName = "Arial"
+        playLabel.position = CGPoint(x: frame.midX, y: frame.midY - 50)
+        playLabel.name = "playLabel"
+        addChild(playLabel)
+        
         livesLabel.fontSize = 18
         livesLabel.fontColor = .black
         livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
@@ -45,4 +65,47 @@ class GameScene: SKScene {
         addChild(scoreLabel)
     }
     
+    func updateLabels() {
+        scoreLabel.text = ("Score: \(score)")
+        livesLabel.text = ("Lives: \(lives)")
+    }
+    
+    func createSpaceship() {
+        spaceship.removeFromParent()
+        spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
+        spaceship.physicsBody?.isDynamic = false
+        spaceship.setScale(0.125)
+        spaceship.name = "Spaceship"
+        addChild(spaceship)
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let location = touch.location(in: self)
+            if playingGame {
+                spaceship.position.x = location.x
+            }
+            else {
+                for node in nodes(at: location) {
+                    if node.name == "playLabel" {
+                        playingGame = true
+                        node.alpha = 0
+                        score = 0
+                        lives = 3
+                        updateLabels()
+                        
+                    }
+                }
+            }
+        }
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let location = touch.location(in: self)
+            if playingGame {
+                spaceship.position.x = location.x
+            }
+        }
+    }
 }

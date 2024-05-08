@@ -37,7 +37,7 @@ class GameScene: SKScene {
             starsBackground.zPosition = -1
             starsBackground.position = CGPoint(x: 0, y: starsBackground.size.height * CGFloat(i))
             addChild(starsBackground)
-            let moveDown =  SKAction.moveBy(x: 0, y: -starsBackground.size.height, duration: 20)
+            let moveDown = SKAction.moveBy(x: 0, y: -starsBackground.size.height, duration: 20)
             let moveReset = SKAction.moveBy(x: 0, y: starsBackground.size.height, duration: 0)
             let moveLoop = SKAction.sequence([moveDown, moveReset])
             let moveForever = SKAction.repeatForever(moveLoop)
@@ -54,12 +54,13 @@ class GameScene: SKScene {
         addChild(playLabel)
         
         livesLabel.fontSize = 18
-        livesLabel.fontColor = .black
+        livesLabel.fontColor = .white
+        livesLabel.fontName = "Arial"
         livesLabel.position = CGPoint(x: frame.minX + 50, y: frame.minY + 18)
         addChild(livesLabel)
         
         scoreLabel.fontSize = 18
-        scoreLabel.fontColor = .black
+        scoreLabel.fontColor = .white
         scoreLabel.fontName = "Arial"
         scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
         addChild(scoreLabel)
@@ -74,7 +75,7 @@ class GameScene: SKScene {
         spaceship.removeFromParent()
         spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
         spaceship.physicsBody?.isDynamic = false
-        spaceship.setScale(0.125)
+        spaceship.setScale(0.07)
         spaceship.name = "Spaceship"
         addChild(spaceship)
     }

@@ -16,6 +16,7 @@ class GameScene: SKScene {
     var playLabel = SKLabelNode()
     var score = 0
     var lives = 3
+    var lasers: [CGPoint] = []
     
     override func didMove(to view: SKView) {
         //happens once (when the game opens
@@ -99,6 +100,14 @@ class GameScene: SKScene {
                 }
             }
         }
+    }
+    func shootLasers(from startPoint: CGPoint) {
+        let newLaserPosition = CGPoint(x: startPoint.x, y: startPoint.y - 20)
+        lasers.append(newLaserPosition)
+        
+        let laserNode = SKSpriteNode(color: .red, size: CGSize(width: 2, height: 20))
+        laserNode.position = newLaserPosition
+        addChild(laserNode)
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {

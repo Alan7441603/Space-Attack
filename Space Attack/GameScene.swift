@@ -86,6 +86,7 @@ class GameScene: SKScene {
             let location = touch.location(in: self)
             if playingGame {
                 spaceship.position.x = location.x
+                shootLasers(from: spaceship.position)
             }
             else {
                 for node in nodes(at: location) {
@@ -108,6 +109,10 @@ class GameScene: SKScene {
         let laserNode = SKSpriteNode(color: .red, size: CGSize(width: 2, height: 20))
         laserNode.position = newLaserPosition
         addChild(laserNode)
+        
+        let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
+        let removeAction = SKAction.removeFromParent()
+        laserNode.run(SKAction.sequence([moveAction, removeAction]))
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {

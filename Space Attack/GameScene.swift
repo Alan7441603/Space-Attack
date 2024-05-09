@@ -7,6 +7,7 @@
 
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
 class GameScene: SKScene {
     var livesLabel = SKLabelNode()
@@ -110,6 +111,8 @@ class GameScene: SKScene {
         laserNode.position = newLaserPosition
         addChild(laserNode)
         
+        SoundManager.instance.playSound()
+        
         let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
         let removeAction = SKAction.removeFromParent()
         laserNode.run(SKAction.sequence([moveAction, removeAction]))
@@ -124,3 +127,22 @@ class GameScene: SKScene {
         }
     }
 }
+
+class SoundManager {
+    static let instance = SoundManager()
+    var player: AVAudioPlayer?
+    func playSound() {
+        //Destination of Weight Sound
+        guard let url = Bundle.main.url(forResource: "LaserSound", withExtension: ".wav") else {return}
+        
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()
+        } 
+        catch let error {
+            print("Error playing sound.\(error.localizedDescription)")
+            
+        }
+    }
+}
+

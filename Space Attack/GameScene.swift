@@ -18,6 +18,8 @@ class GameScene: SKScene {
     var score = 0
     var lives = 3
     var lasers: [CGPoint] = []
+    let ships = ["smallShip", "mediumShip", "largeShip"]
+    var shipPoints: [String: Int] = [:] // Dictionary to store points for each ship
     
     override func didMove(to view: SKView) {
         //happens once (when the game opens
@@ -28,6 +30,7 @@ class GameScene: SKScene {
     
     func resetGame() {
         //this stuff happens before each game starts
+        createEnemyShips()
         createSpaceship()
         updateLabels()
     }
@@ -82,6 +85,55 @@ class GameScene: SKScene {
         addChild(spaceship)
     }
     
+    func createEnemyShips() {
+        let rowCount = 6 // rows
+        let columnCount = Int(size.width / 100) // columns based on screen width
+        let columnWidth = size.width / CGFloat(columnCount)
+        let rowHeight = size.height / CGFloat(rowCount) / 2.5 // spacing
+        let xMin = -size.width / 2 + columnWidth / 2
+        let xMax = size.width / 2 - columnWidth / 2
+        
+        let moveSideToSide = SKAction.sequence([
+            SKAction.moveBy(x: size.width / 10, y: 0, duration: 2.0), // duration
+            SKAction.moveBy(x: -size.width / 10, y: 0, duration: 2.0) // duration
+        ])
+        let moveDown = SKAction.moveBy(x: 0, y: -rowHeight, duration: 1.0) // duration
+        let moveSequence = SKAction.sequence([moveSideToSide, moveDown])
+        let moveAction = SKAction.repeatForever(moveSequence)
+        
+        for row in 0..<rowCount {
+            for column in 0..<columnCount {
+                let enemy = SKSpriteNode(imageNamed: ships.randomElement()!)
+                enemy.setScale(0.1) // Scale down to 1/10
+                let xPos = xMin + CGFloat(column) * columnWidth
+                let yPos = CGFloat(row) * rowHeight + rowHeight / 2
+                enemy.position = CGPoint(x: xPos, y: yPos)
+                enemy.run(moveAction) // Run the side-to-side and downward movement action
+                addChild(enemy)
+            }
+        }
+    }
+    
+    func setShipPoints() {
+        // Set points value for each ship
+        shipPoints["smallShip"] = 50
+        shipPoints["mediumShip"] = 100
+        shipPoints["largeShip"] = 200
+    }
+    
+    func shootLasers(from startPoint: CGPoint) {
+        let newLaserPosition = CGPoint(x: startPoint.x, y: startPoint.y - 20)
+        lasers.append(newLaserPosition)
+        
+        let laserNode = SKSpriteNode(color: .red, size: CGSize(width: 2, height: 20))
+        laserNode.position = newLaserPosition
+        addChild(laserNode)
+        
+        let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
+        let removeAction = SKAction.removeFromParent()
+        laserNode.run(SKAction.sequence([moveAction, removeAction]))
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             let location = touch.location(in: self)
@@ -103,20 +155,6 @@ class GameScene: SKScene {
             }
         }
     }
-    func shootLasers(from startPoint: CGPoint) {
-        let newLaserPosition = CGPoint(x: startPoint.x, y: startPoint.y - 20)
-        lasers.append(newLaserPosition)
-        
-        let laserNode = SKSpriteNode(color: .red, size: CGSize(width: 2, height: 20))
-        laserNode.position = newLaserPosition
-        addChild(laserNode)
-        
-        SoundManager.instance.playSound()
-        
-        let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
-        let removeAction = SKAction.removeFromParent()
-        laserNode.run(SKAction.sequence([moveAction, removeAction]))
-    }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
@@ -125,6 +163,11 @@ class GameScene: SKScene {
                 spaceship.position.x = location.x
             }
         }
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        // Call the collisions function to handle the collision
+        collisions(contact: contact)
     }
 }
 

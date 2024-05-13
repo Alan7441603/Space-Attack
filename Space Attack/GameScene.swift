@@ -9,7 +9,7 @@ import SpriteKit
 import GameplayKit
 import AVFoundation
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     var livesLabel = SKLabelNode()
     var scoreLabel = SKLabelNode()
     var spaceship = SKSpriteNode(imageNamed: "Spaceship")
@@ -22,10 +22,12 @@ class GameScene: SKScene {
     var shipPoints: [String: Int] = [:] // Dictionary to store points for each ship
     
     override func didMove(to view: SKView) {
-        //happens once (when the game opens
+        // happens once(when the game opens)
+        setShipPoints()
         createBackground()
         resetGame()
         makeLabels()
+        physicsWorld.contactDelegate = self
     }
     
     func resetGame() {
@@ -67,7 +69,7 @@ class GameScene: SKScene {
         scoreLabel.fontSize = 18
         scoreLabel.fontColor = .white
         scoreLabel.fontName = "Arial"
-        scoreLabel.position = CGPoint(x: frame.maxX - 50, y: frame.minY + 18)
+        scoreLabel.position = CGPoint(x: frame.maxX - 80, y: frame.minY + 18)
         addChild(scoreLabel)
     }
     
@@ -79,39 +81,95 @@ class GameScene: SKScene {
     func createSpaceship() {
         spaceship.removeFromParent()
         spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
-        spaceship.physicsBody?.isDynamic = false
-        spaceship.setScale(0.07)
+        
+        // Configure the physics body properties
+        spaceship.physicsBody?.isDynamic = true // Allow the ship to move based on forces and collisions
+        spaceship.physicsBody?.affectedByGravity = false // Don't let gravity affect the ship
+        spaceship.physicsBody?.allowsRotation = false // Prevent the ship from rotating due to collisions
+        
+        // Set the category bit mask for the player's ship
+        spaceship.physicsBody?.categoryBitMask = 1 << 0 // Category for player's ship
+        // Set the collision and contact test bit masks
+        spaceship.physicsBody?.collisionBitMask = 0 // Specify which categories the ship should collide with
+        spaceship.physicsBody?.contactTestBitMask = 1 << 3 // Specify which categories the ship should test for contact with
+        
+        spaceship.setScale(0.05)
         spaceship.name = "Spaceship"
         addChild(spaceship)
     }
     
     func createEnemyShips() {
-        let rowCount = 6 // rows
-        let columnCount = Int(size.width / 100) // columns based on screen width
+        let rowCount = 6
+        let columnCount = Int(size.width / 100)
         let columnWidth = size.width / CGFloat(columnCount)
-        let rowHeight = size.height / CGFloat(rowCount) / 2.5 // spacing
-        let xMin = -size.width / 2 + columnWidth / 2
-        let xMax = size.width / 2 - columnWidth / 2
-        
-        let moveSideToSide = SKAction.sequence([
-            SKAction.moveBy(x: size.width / 10, y: 0, duration: 2.0), // duration
-            SKAction.moveBy(x: -size.width / 10, y: 0, duration: 2.0) // duration
-        ])
-        let moveDown = SKAction.moveBy(x: 0, y: -rowHeight, duration: 1.0) // duration
-        let moveSequence = SKAction.sequence([moveSideToSide, moveDown])
-        let moveAction = SKAction.repeatForever(moveSequence)
+        let rowHeight = size.height / CGFloat(rowCount) / 2.5
         
         for row in 0..<rowCount {
             for column in 0..<columnCount {
-                let enemy = SKSpriteNode(imageNamed: ships.randomElement()!)
-                enemy.setScale(0.1) // Scale down to 1/10
-                let xPos = xMin + CGFloat(column) * columnWidth
-                let yPos = CGFloat(row) * rowHeight + rowHeight / 2
-                enemy.position = CGPoint(x: xPos, y: yPos)
-                enemy.run(moveAction) // Run the side-to-side and downward movement action
-                addChild(enemy)
+                if let shipType = ships.randomElement() {
+                    let enemy = SKSpriteNode(imageNamed: shipType)
+                    enemy.setScale(0.1)
+                    
+                    // Calculate the x and y positions for the enemy ship
+                    let xPos = CGFloat(column) * columnWidth - size.width / 2 + columnWidth / 2
+                    let yPos = size.height / 2 - CGFloat(row) * rowHeight
+                    
+                    enemy.position = CGPoint(x: xPos, y: yPos)
+                    
+                    // Assign physics body and set affectedByGravity to false
+                    enemy.physicsBody = SKPhysicsBody(rectangleOf: enemy.size)
+                    enemy.physicsBody?.isDynamic = true
+                    enemy.physicsBody?.affectedByGravity = false
+                    enemy.physicsBody?.categoryBitMask = 1 << 2 // Category for enemy ships
+                    enemy.physicsBody?.contactTestBitMask = 1 << 1 // Contact with lasers
+                    enemy.physicsBody?.collisionBitMask = 0 // No collision response needed
+                    
+                    // Define movement actions for the enemy ship
+                    let moveSideToSide = SKAction.sequence([
+                        SKAction.moveBy(x: size.width / 10, y: 0, duration: 2.0),
+                        SKAction.moveBy(x: -size.width / 10, y: 0, duration: 2.0)
+                    ])
+                    let moveDown = SKAction.moveBy(x: 0, y: -rowHeight, duration: 1.0)
+                    let moveSequence = SKAction.sequence([moveSideToSide, moveDown])
+                    let moveAction = SKAction.repeatForever(moveSequence)
+                    
+                    // Run the actions on the enemy ship
+                    enemy.run(moveAction)
+                    // Add enemy shooting lasers randomly
+                    let shootLaserAction = SKAction.run {
+                        self.enemyLaser(enemy)
+                    }
+                    let randomWait = SKAction.wait(forDuration: Double.random(in: 2.0...5.0))
+                    let shootSequence = SKAction.sequence([randomWait, shootLaserAction])
+                    let repeatShooting = SKAction.repeatForever(shootSequence)
+                    
+                    enemy.run(repeatShooting)
+                    
+                    enemy.name = shipType
+                    addChild(enemy)
+                }
             }
         }
+    }
+    
+    func enemyLaser(_ enemy: SKSpriteNode) {
+        let laser = SKSpriteNode(color: .blue, size: CGSize(width: 2, height: 20))
+        laser.position = enemy.position
+        laser.position.y -= enemy.size.height / 2
+        
+        addChild(laser)
+        
+        laser.physicsBody = SKPhysicsBody(rectangleOf: laser.size)
+        laser.physicsBody?.isDynamic = true
+        laser.physicsBody?.affectedByGravity = false
+        laser.physicsBody?.categoryBitMask = 1 << 3 // New category for enemy lasers
+        laser.physicsBody?.contactTestBitMask = 1 << 0 // Contact with spaceship
+        laser.physicsBody?.collisionBitMask = 0
+        
+        let moveAction = SKAction.moveBy(x: 0, y: -frame.height, duration: 3.0)
+        let removeAction = SKAction.removeFromParent()
+        
+        laser.run(SKAction.sequence([moveAction, removeAction]))
     }
     
     func setShipPoints() {
@@ -129,6 +187,12 @@ class GameScene: SKScene {
         laserNode.position = newLaserPosition
         addChild(laserNode)
         
+        laserNode.physicsBody = SKPhysicsBody(rectangleOf: laserNode.size)
+        laserNode.physicsBody?.isDynamic = true
+        laserNode.physicsBody?.affectedByGravity = false
+        laserNode.physicsBody?.categoryBitMask = 1 << 1 // Category for lasers
+        laserNode.physicsBody?.contactTestBitMask = 1 << 2 // Contact with enemy ships
+        laserNode.physicsBody?.collisionBitMask = 0 // No collision response needed
         
         
         let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
@@ -151,7 +215,6 @@ class GameScene: SKScene {
                         score = 0
                         lives = 3
                         updateLabels()
-                        
                     }
                 }
             }
@@ -166,30 +229,51 @@ class GameScene: SKScene {
             }
         }
     }
-}
-
-class SoundManager {
-    static let instance = SoundManager()
-    var player: AVAudioPlayer?
-    var workingLaser: AVAudioPlayer
     
-    init() {
-        guard let laserURL = Bundle.main.url(forResource: "WorkingLaser", withExtension: "mp3") else {
-            fatalError("WorkingLaser.mp3 not found")
+    func didBegin(_ contact: SKPhysicsContact) {
+        // Determine the bodies involved in the collision
+        let firstBody = contact.bodyA
+        let secondBody = contact.bodyB
+        
+        // Check if one body is a laser and the other is an enemy ship
+        if (firstBody.categoryBitMask == 1 << 1 && secondBody.categoryBitMask == 1 << 2) ||
+            (firstBody.categoryBitMask == 1 << 2 && secondBody.categoryBitMask == 1 << 1) {
+            
+            // Determine which body is the laser and which is the enemy ship
+            let laser = firstBody.categoryBitMask == 1 << 1 ? firstBody.node : secondBody.node
+            let enemy = firstBody.categoryBitMask == 1 << 2 ? firstBody.node : secondBody.node
+            
+            // Remove the laser and enemy ship from the scene
+            laser?.removeFromParent()
+            enemy?.removeFromParent()
+            
+            // Update the score based on the type of enemy ship
+            if let enemyNode = enemy as? SKSpriteNode, let enemyName = enemyNode.name, let points = shipPoints[enemyName] {
+                score += points
+                updateLabels()
+            }
         }
-        do {
-            workingLaser = try AVAudioPlayer(contentsOf: laserURL)
-            workingLaser.prepareToPlay()
-        } catch {
-            print("Error loading laser sound: \(error.localizedDescription)")
-            // Initialize workingLaser with an empty AVAudioPlayer to avoid the error
-            workingLaser = AVAudioPlayer()
+        
+        // Check if one body is the enemy laser and the other is the player's ship
+        if (firstBody.categoryBitMask == 1 << 3 && secondBody.categoryBitMask == 1 << 0) ||
+            (firstBody.categoryBitMask == 1 << 0 && secondBody.categoryBitMask == 1 << 3) {
+            
+            // Determine which body is the enemy laser and which is the player's ship
+            let enemyLaser = firstBody.categoryBitMask == 1 << 3 ? firstBody.node : secondBody.node
+            let playerShip = firstBody.categoryBitMask == 1 << 0 ? firstBody.node : secondBody.node
+            
+            // Remove the enemy laser from the scene
+            enemyLaser?.removeFromParent()
+            lives -= 1
+            updateLabels()
+            
+            // Check if the player has lost all their lives
+            if lives <= 0 {
+                print("Game Over! Player has lost all lives.")
+                // Reset or stop the game
+                playingGame = false
+                playLabel.alpha = 1
+            }
         }
     }
-    
-    // Define playSound() method separately
-    func playSound() {
-        workingLaser.play()
-    }
 }
-

@@ -129,6 +129,8 @@ class GameScene: SKScene {
         laserNode.position = newLaserPosition
         addChild(laserNode)
         
+        
+        
         let moveAction = SKAction.moveBy(x: 0, y: 750, duration: 1.0)
         let removeAction = SKAction.removeFromParent()
         laserNode.run(SKAction.sequence([moveAction, removeAction]))
@@ -164,28 +166,30 @@ class GameScene: SKScene {
             }
         }
     }
-    
-    func didBegin(_ contact: SKPhysicsContact) {
-        // Call the collisions function to handle the collision
-        collisions(contact: contact)
-    }
 }
 
 class SoundManager {
     static let instance = SoundManager()
     var player: AVAudioPlayer?
-    func playSound() {
-        //Destination of Weight Sound
-        guard let url = Bundle.main.url(forResource: "LaserSound", withExtension: ".wav") else {return}
-        
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.play()
-        } 
-        catch let error {
-            print("Error playing sound.\(error.localizedDescription)")
-            
+    var workingLaser: AVAudioPlayer
+    
+    init() {
+        guard let laserURL = Bundle.main.url(forResource: "WorkingLaser", withExtension: "mp3") else {
+            fatalError("WorkingLaser.mp3 not found")
         }
+        do {
+            workingLaser = try AVAudioPlayer(contentsOf: laserURL)
+            workingLaser.prepareToPlay()
+        } catch {
+            print("Error loading laser sound: \(error.localizedDescription)")
+            // Initialize workingLaser with an empty AVAudioPlayer to avoid the error
+            workingLaser = AVAudioPlayer()
+        }
+    }
+    
+    // Define playSound() method separately
+    func playSound() {
+        workingLaser.play()
     }
 }
 

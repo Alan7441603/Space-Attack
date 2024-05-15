@@ -18,7 +18,7 @@
 		EA455E3E2BC97F3300FA90E9 /* Space_AttackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA455E3D2BC97F3300FA90E9 /* Space_AttackTests.swift */; };
 		EA455E482BC97F3300FA90E9 /* Space_AttackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA455E472BC97F3300FA90E9 /* Space_AttackUITests.swift */; };
 		EA455E4A2BC97F3300FA90E9 /* Space_AttackUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA455E492BC97F3300FA90E9 /* Space_AttackUITestsLaunchTests.swift */; };
-		EA455E5D2BF2608500FA90E9 /* WorkingLaser.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = EA455E5C2BF2608500FA90E9 /* WorkingLaser.mp3 */; };
+		EA455E612BF3B09900FA90E9 /* LaserSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = EA455E602BF3B09900FA90E9 /* LaserSound.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +53,7 @@
 		EA455E432BC97F3300FA90E9 /* Space AttackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Space AttackUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA455E472BC97F3300FA90E9 /* Space_AttackUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Space_AttackUITests.swift; sourceTree = "<group>"; };
 		EA455E492BC97F3300FA90E9 /* Space_AttackUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Space_AttackUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		EA455E5C2BF2608500FA90E9 /* WorkingLaser.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = WorkingLaser.mp3; path = "../../../../Music/Music/Media.localized/Music/Unknown Artist/Unknown Album/WorkingLaser.mp3"; sourceTree = "<group>"; };
+		EA455E602BF3B09900FA90E9 /* LaserSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = LaserSound.mp3; path = "../../../../Music/Music/Media.localized/Music/Unknown Artist/Unknown Album/LaserSound.mp3"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +104,7 @@
 		EA455E222BC97F3100FA90E9 /* Space Attack */ = {
 			isa = PBXGroup;
 			children = (
-				EA455E5C2BF2608500FA90E9 /* WorkingLaser.mp3 */,
+				EA455E602BF3B09900FA90E9 /* LaserSound.mp3 */,
 				EA455E232BC97F3100FA90E9 /* AppDelegate.swift */,
 				EA455E252BC97F3100FA90E9 /* GameScene.sks */,
 				EA455E272BC97F3100FA90E9 /* Actions.sks */,
@@ -240,9 +240,9 @@
 			files = (
 				EA455E2F2BC97F3100FA90E9 /* Main.storyboard in Resources */,
 				EA455E262BC97F3100FA90E9 /* GameScene.sks in Resources */,
-				EA455E5D2BF2608500FA90E9 /* WorkingLaser.mp3 in Resources */,
 				EA455E312BC97F3300FA90E9 /* Assets.xcassets in Resources */,
 				EA455E342BC97F3300FA90E9 /* LaunchScreen.storyboard in Resources */,
+				EA455E612BF3B09900FA90E9 /* LaserSound.mp3 in Resources */,
 				EA455E282BC97F3100FA90E9 /* Actions.sks in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

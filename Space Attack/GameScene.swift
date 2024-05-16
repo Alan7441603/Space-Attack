@@ -1,3 +1,4 @@
+
 //
 //  GameScene.swift
 //  Space Attack
@@ -73,14 +74,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(scoreLabel)
     }
     
-    func updateLabels() {
-        scoreLabel.text = ("Score: \(score)")
-        livesLabel.text = ("Lives: \(lives)")
-    }
-    
     func createSpaceship() {
         spaceship.removeFromParent()
         spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
+        
+        // Initialize the physics body with a rectangle of the size of the spaceship
+        spaceship.physicsBody = SKPhysicsBody(rectangleOf: spaceship.size)
         
         // Configure the physics body properties
         spaceship.physicsBody?.isDynamic = true // Allow the ship to move based on forces and collisions
@@ -139,18 +138,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     let shootLaserAction = SKAction.run {
                         self.enemyLaser(enemy)
                     }
-                    let randomWait = SKAction.wait(forDuration: Double.random(in: 2.0...5.0))
+                    let randomWait = SKAction.wait(forDuration: Double.random(in: 4.0...8.0))
                     let shootSequence = SKAction.sequence([randomWait, shootLaserAction])
                     let repeatShooting = SKAction.repeatForever(shootSequence)
-                    
                     enemy.run(repeatShooting)
-                    
-                    enemy.name = shipType
+                    enemy.name = shipType // Set the name of the enemy to its type for scoring
                     addChild(enemy)
                 }
             }
         }
     }
+    
+    func enemyShipDestroyed(enemy: SKSpriteNode) {
+           if let shipType = enemy.name, let points = shipPoints[shipType] {
+               score += points
+               updateLabels()
+           }
+       }
     
     func enemyLaser(_ enemy: SKSpriteNode) {
         let laser = SKSpriteNode(color: .blue, size: CGSize(width: 2, height: 20))
@@ -231,15 +235,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
-        // Determine the bodies involved in the collision
         let firstBody = contact.bodyA
         let secondBody = contact.bodyB
         
-        // Check if one body is a laser and the other is an enemy ship
+        // Check if a laser and an enemy ship have collided
         if (firstBody.categoryBitMask == 1 << 1 && secondBody.categoryBitMask == 1 << 2) ||
             (firstBody.categoryBitMask == 1 << 2 && secondBody.categoryBitMask == 1 << 1) {
             
-            // Determine which body is the laser and which is the enemy ship
+            // Determine the laser and enemy ship nodes
             let laser = firstBody.categoryBitMask == 1 << 1 ? firstBody.node : secondBody.node
             let enemy = firstBody.categoryBitMask == 1 << 2 ? firstBody.node : secondBody.node
             
@@ -248,32 +251,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy?.removeFromParent()
             
             // Update the score based on the type of enemy ship
-            if let enemyNode = enemy as? SKSpriteNode, let enemyName = enemyNode.name, let points = shipPoints[enemyName] {
-                score += points
-                updateLabels()
+            if let enemyNode = enemy as? SKSpriteNode {
+                enemyShipDestroyed(enemy: enemyNode)
             }
         }
         
-        // Check if one body is the enemy laser and the other is the player's ship
+        // Check if an enemy laser and the player's ship have collided
         if (firstBody.categoryBitMask == 1 << 3 && secondBody.categoryBitMask == 1 << 0) ||
             (firstBody.categoryBitMask == 1 << 0 && secondBody.categoryBitMask == 1 << 3) {
             
-            // Determine which body is the enemy laser and which is the player's ship
+            // Determine the enemy laser and player's ship nodes
             let enemyLaser = firstBody.categoryBitMask == 1 << 3 ? firstBody.node : secondBody.node
-            let playerShip = firstBody.categoryBitMask == 1 << 0 ? firstBody.node : secondBody.node
             
             // Remove the enemy laser from the scene
             enemyLaser?.removeFromParent()
+            
+            // Decrease player lives and update labels
             lives -= 1
             updateLabels()
             
-            // Check if the player has lost all their lives
+            // Check if the player has lost all lives
             if lives <= 0 {
-                print("Game Over! Player has lost all lives.")
-                // Reset or stop the game
-                playingGame = false
-                playLabel.alpha = 1
+                gameOver()
             }
         }
+    }
+    
+    
+    func addScore(for enemyName: String) {
+        // Increment score based on the type of ship destroyed
+        if let points = shipPoints[enemyName] {
+            score += points
+            updateLabels()
+        }
+    }
+    
+    func gameOver() {
+        // Handle game over scenario
+        print("Game Over! Player has lost all lives.")
+        playingGame = false
+        playLabel.alpha = 1
+    }
+    
+    func updateLabels() {
+        // Update the score and lives labels
+        self.scoreLabel.text = "Score: \(self.score)"
+        self.livesLabel.text = "Lives: \(self.lives)"
     }
 }

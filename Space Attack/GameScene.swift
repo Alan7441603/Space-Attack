@@ -75,27 +75,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createSpaceship() {
-        spaceship.removeFromParent()
-        spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
-        
-        // Initialize the physics body with a rectangle of the size of the spaceship
-        spaceship.physicsBody = SKPhysicsBody(rectangleOf: spaceship.size)
-        
-        // Configure the physics body properties
-        spaceship.physicsBody?.isDynamic = true // Allow the ship to move based on forces and collisions
-        spaceship.physicsBody?.affectedByGravity = false // Don't let gravity affect the ship
-        spaceship.physicsBody?.allowsRotation = false // Prevent the ship from rotating due to collisions
-        
-        // Set the category bit mask for the player's ship
-        spaceship.physicsBody?.categoryBitMask = 1 << 0 // Category for player's ship
-        // Set the collision and contact test bit masks
-        spaceship.physicsBody?.collisionBitMask = 0 // Specify which categories the ship should collide with
-        spaceship.physicsBody?.contactTestBitMask = 1 << 3 // Specify which categories the ship should test for contact with
-        
-        spaceship.setScale(0.05)
-        spaceship.name = "Spaceship"
-        addChild(spaceship)
-    }
+            spaceship.removeFromParent()
+            spaceship.position = CGPoint(x: frame.midX, y: frame.minY + 125)
+            
+            // Initialize the physics body with a rectangle of the size of the spaceship
+            spaceship.physicsBody = SKPhysicsBody(rectangleOf: spaceship.size)
+            
+            // Configure the physics body properties
+            spaceship.physicsBody?.isDynamic = true // Allow the ship to move based on forces and collisions
+            spaceship.physicsBody?.affectedByGravity = false // Don't let gravity affect the ship
+            spaceship.physicsBody?.allowsRotation = false // Prevent the ship from rotating due to collisions
+            
+            // Set the category bit mask for the player's ship
+            spaceship.physicsBody?.categoryBitMask = 1 << 0 // Category for player's ship
+            // Set the collision and contact test bit masks
+            spaceship.physicsBody?.collisionBitMask = 0 // Specify which categories the ship should collide with
+            spaceship.physicsBody?.contactTestBitMask = 1 << 3 // Specify which categories the ship should test for contact with
+            
+            spaceship.setScale(0.05)
+            spaceship.name = "Spaceship"
+            addChild(spaceship)
+        }
     
     func createEnemyShips() {
         let rowCount = 6
@@ -297,5 +297,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Update the score and lives labels
         self.scoreLabel.text = "Score: \(self.score)"
         self.livesLabel.text = "Lives: \(self.lives)"
+    }
+    
+    func gameOver(winner: Bool) {
+        playingGame = false
+        playLabel.alpha = 1
+        resetGame()
+        if winner {
+            playLabel.text = "You win! Tap to play again"
+        } else {
+            playLabel.text = "You lose! Tap to play again"
+        }
     }
 }
